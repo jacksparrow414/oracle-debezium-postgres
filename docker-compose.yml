@@ -1,0 +1,114 @@
+version: "3"
+services:
+  kafka1:
+    image: 'bitnami/kafka:latest'
+    container_name: kafka1
+    networks:
+      - app-tier
+    ports:
+      - '19092:9092'
+      - '19093:9093'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.105:19092
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=LelM2dIFQkiUFvXCEcqRWA
+    volumes:
+      - kafka_1_data:/bitnami/kafka
+  kafka2:
+    image: 'bitnami/kafka:latest'
+    container_name: kafka2
+    networks:
+      - app-tier
+    ports:
+      - '29092:9092'
+      - '29093:9093'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.105:29092
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=LelM2dIFQkiUFvXCEcqRWA
+    volumes:
+      - kafka_2_data:/bitnami/kafka
+  kafka3:
+    image: 'bitnami/kafka:latest'
+    container_name: kafka3
+    networks:
+      - app-tier
+    ports:
+      - '39092:9092'
+      - '39093:9093'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.105:39092
+      - KAFKA_BROKER_ID=3
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=LelM2dIFQkiUFvXCEcqRWA
+    volumes:
+      - kafka_3_data:/bitnami/kafka
+  oracle-db:
+    image: container-registry.oracle.com/database/enterprise:12.2.0.1
+    container_name: oracle
+    networks:
+      - app-tier
+#   连接的时候service名字为ORCLCDB.localdomain
+    environment:
+      - ORACLE_SID=ORCLCDB
+      - ORACLE_PDB=ORCLPDB1
+      - ORACLE_PWD=12345
+    ports:
+      - 1521:1521
+      - 5500:5500
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+  postgre-db:
+    shm_size: '1gb'
+    image: postgres:latest
+    container_name: pgdb
+    networks:
+      - app-tier
+    restart: "no"
+    ports:
+      - 5432:5432
+    command: postgres -c timezone='US/Eastern'
+    environment:
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - type: volume
+        source: pgdb-data
+        target: /var/lib/postgresql
+        read_only: false
+networks:
+  app-tier:
+    driver: bridge
+volumes:
+  kafka_1_data:
+    driver: local
+  kafka_2_data:
+    driver: local
+  kafka_3_data:
+    driver: local
+  oracle_data:
+    driver: local
+  pgdb-data:
+    driver: local
