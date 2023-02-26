@@ -42,6 +42,8 @@ services:
       - KAFKA_KRAFT_CLUSTER_ID=LelM2dIFQkiUFvXCEcqRWA
     volumes:
       - kafka_2_data:/bitnami/kafka
+    depends_on:
+      - kafka1
   kafka3:
     image: 'bitnami/kafka:latest'
     container_name: kafka3
@@ -63,12 +65,15 @@ services:
       - KAFKA_KRAFT_CLUSTER_ID=LelM2dIFQkiUFvXCEcqRWA
     volumes:
       - kafka_3_data:/bitnami/kafka
-  oracle-db:
+    depends_on:
+      - kafka1
+      - kafka2
+  oracledb:
     image: container-registry.oracle.com/database/enterprise:12.2.0.1
     container_name: oracle
     networks:
       - app-tier
-#   连接的时候service名字为ORCLCDB.localdomain
+#   Navicat 连接的时候service名字为ORCLCDB.localdomain
     environment:
       - ORACLE_SID=ORCLCDB
       - ORACLE_PDB=ORCLPDB1
@@ -78,6 +83,9 @@ services:
       - 5500:5500
     volumes:
       - oracle_data:/opt/oracle/oradata
+      - ./oracle/recovery_area:/opt/oracle/oradata/recovery_area
+      - ./oracle/ORCLCDB/logminer_tbs.dbf:/opt/oracle/oradata/ORCLCDB/logminer_tbs.dbf
+      - ./oracle/ORCLCDB/ORCLPDB1/logminer_tbs.dbf:/opt/oracle/oradata/ORCLCDB/ORCLPDB1/logminer_tbs.dbf
   postgre-db:
     shm_size: '1gb'
     image: postgres:latest
@@ -98,6 +106,28 @@ services:
         source: pgdb-data
         target: /var/lib/postgresql
         read_only: false
+  connect:
+    image: debezium/connect:latest
+    container_name: connect
+    networks:
+      - app-tier
+    ports:
+      - 8083:8083
+    environment:
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=cdc_storage
+      - OFFSET_STORAGE_TOPIC=cdc_offset
+      - BOOTSTRAP_SERVERS=kafka1:9092,kafka2:9092,kafka3:9092
+      - CONNECT_PLUGIN_PATH=/kafka/connect
+    volumes:
+      - ./jar/confluentinc-kafka-connect-jdbc-10.6.3:/kafka/connect/confluentinc-kafka-connect-jdbc-10.6.3
+      - ./jar/debezium-connector-oracle:/kafka/connect/debezium-connector-oracle
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+      - oracledb
+      - postgre-db
 networks:
   app-tier:
     driver: bridge
