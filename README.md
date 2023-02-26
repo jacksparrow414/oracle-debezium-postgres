@@ -31,3 +31,15 @@ sqlplus sys/12345@//localhost:1521/ORCLPDB1.localdomain as sysdba
 alter session set "_ORACLE_SCRIPT"=true;
 CREATE USER c##dbzuser IDENTIFIED BY dbz DEFAULT TABLESPACE logminer_tbs QUOTA UNLIMITED ON logminer_tbs CONTAINER=ALL;
 ```
+
+```sql
+curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @oracle-source.json
+
+curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @postgre-sink.json
+
+curl -X DELETE http://localhost:8083/connectors/jdbc-sink-customers-postgress
+
+kafka-topics.sh --bootstrap-server kafka1:9022,kafka2:9022,kafka3:9022 --delete --topic __consumer_offsets
+
+kafka-console-consumer.sh --from-beginning --bootstrap-server kafka1:9092 --topic server1.C__DBZUSER.CONTACT
+```
