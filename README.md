@@ -24,12 +24,13 @@ mkdir ORCLPDB1
 cd ORCLPDB1
 touch logminer_tbs.dbf
 ```
+5. modify the IP address of KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.105 in the docker-compose.yml file to the IP of your machine (ifconfig)
 
 # Step
 1.0 docker-compose up -d  
 
 1.1 **Please ensure that all containers can start normally and there are no errors before proceeding to the next steps**  
-
+![](https://github.com/jacksparrow414/oracle-debezium-postgres/blob/main/Xnip2023-02-27_19-21-22.jpg)
 2.0 configure the Oracle database,Refs [Debezium Oracle Connetor Documentation Start with preparing_the_database](https://debezium.io/documentation/reference/2.1/connectors/oracle.html#_preparing_the_database)  
 
 2.1 [resize Oracle Database redo log](https://logic.edchen.org/how-to-resize-redo-logs-in-oracle/)  
