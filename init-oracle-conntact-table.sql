@@ -1,0 +1,62 @@
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : oracle
+ Source Server Type    : Oracle
+ Source Server Version : 120200
+ Source Host           : localhost:1521
+ Source Schema         : C##DBZUSER
+
+ Target Server Type    : Oracle
+ Target Server Version : 120200
+ File Encoding         : 65001
+
+ Date: 27/02/2023 20:07:29
+*/
+
+
+-- ----------------------------
+-- Table structure for CONTACT
+-- ----------------------------
+-- DROP TABLE "C##DBZUSER"."CONTACT";
+CREATE TABLE "C##DBZUSER"."CONTACT" (
+  "CONTACT_ID" NUMBER(19,0) VISIBLE NOT NULL,
+  "FIRST_NAME" VARCHAR2(255 BYTE) VISIBLE NOT NULL,
+  "LAST_NAME" VARCHAR2(255 BYTE) VISIBLE NOT NULL,
+  "EMAIL" VARCHAR2(255 BYTE) VISIBLE NOT NULL
+)
+LOGGING
+NOCOMPRESS
+PCTFREE 10
+INITRANS 1
+STORAGE (
+  INITIAL 65536 
+  NEXT 1048576 
+  MINEXTENTS 1
+  MAXEXTENTS 2147483645
+  BUFFER_POOL DEFAULT
+)
+PARALLEL 1
+NOCACHE
+DISABLE ROW MOVEMENT
+;
+
+-- ----------------------------
+-- Records of CONTACT
+-- ----------------------------
+INSERT INTO "C##DBZUSER"."CONTACT" ("CONTACT_ID", "FIRST_NAME", "LAST_NAME", "EMAIL") VALUES ('1', 'init', 'log', 'test@cdc.com');
+COMMIT;
+COMMIT;
+
+-- ----------------------------
+-- Primary Key structure for table CONTACT
+-- ----------------------------
+ALTER TABLE "C##DBZUSER"."CONTACT" ADD CONSTRAINT "SYS_C0010972" PRIMARY KEY ("CONTACT_ID");
+
+-- ----------------------------
+-- Checks structure for table CONTACT
+-- ----------------------------
+ALTER TABLE "C##DBZUSER"."CONTACT" ADD CONSTRAINT "SYS_C0010968" CHECK ("CONTACT_ID" IS NOT NULL) NOT DEFERRABLE INITIALLY IMMEDIATE NORELY VALIDATE;
+ALTER TABLE "C##DBZUSER"."CONTACT" ADD CONSTRAINT "SYS_C0010969" CHECK ("FIRST_NAME" IS NOT NULL) NOT DEFERRABLE INITIALLY IMMEDIATE NORELY VALIDATE;
+ALTER TABLE "C##DBZUSER"."CONTACT" ADD CONSTRAINT "SYS_C0010970" CHECK ("LAST_NAME" IS NOT NULL) NOT DEFERRABLE INITIALLY IMMEDIATE NORELY VALIDATE;
+ALTER TABLE "C##DBZUSER"."CONTACT" ADD CONSTRAINT "SYS_C0010971" CHECK ("EMAIL" IS NOT NULL) NOT DEFERRABLE INITIALLY IMMEDIATE NORELY VALIDATE;
