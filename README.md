@@ -1,45 +1,44 @@
+Use Debezium to send Oracle database data to PostgreSQL database through CDC.
 
-```docker
-docker exec -it oracle bash
+
+# Preparations
+1. Sign in https://container-registry.oracle.com/ , then click Database > Enterprise > Tags, select the database version to use.
+2. pull oracle database image
+```shell
+docker login container-registry.oracle.com
+```
+after successful login, execute the following command
+```shell
+docker pull container-registry.oracle.com/database/enterprise:12.2.0.1
+```
+it may take a few minutes.
+
+3. delete all files under the **oracle>ORCLCDB** folder of this project
+4. create empty logminer file
+```shell
+cd oracle
+mkdir recovery_area
+cd ORCLCDB
+touch logminer_tbs.dbf
+mkdir ORCLPDB1
+cd ORCLPDB1
+touch logminer_tbs.dbf
 ```
 
+# Step
+1. docker-compose up -d
+2. configure the Oracle database,Refs [Debezium Oracle Connetor Documentation](https://debezium.io/documentation/reference/2.1/connectors/oracle.html#_preparing_the_database)
+**Notes** : before executing the following commands, switch sessions
 ```sql
-sqlplus sys/12345@//localhost:1521/ORCLCDB.localdomain as SYSDBA
-username: sys as sysdba
-```
-```sql
-sqlplus /nolog
-connect sys as sysdba;
-alter session set "_ORACLE_SCRIPT"=true;
-create user dhb identified by 12345;
-GRANT ALL PRIVILEGES TO dhb;
-```
-
-```sql
-CREATE TABLESPACE logminer_tbs DATAFILE '/opt/oracle/oradata/ORCLCDB/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
-```
-
-```sql
-CONN / AS SYSDBA
 ALTER SESSION SET CONTAINER = ORCLPDB1;
-SHOW CON_NAME
+-- https://debezium.io/documentation/reference/2.1/connectors/oracle.html#creating-users-for-the-connector
 CREATE TABLESPACE logminer_tbs DATAFILE '/opt/oracle/oradata/ORCLCDB/ORCLPDB1/logminer_tbs.dbf' SIZE 25M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
 ```
-
-```sql
-sqlplus sys/12345@//localhost:1521/ORCLPDB1.localdomain as sysdba
-alter session set "_ORACLE_SCRIPT"=true;
-CREATE USER c##dbzuser IDENTIFIED BY dbz DEFAULT TABLESPACE logminer_tbs QUOTA UNLIMITED ON logminer_tbs CONTAINER=ALL;
-```
-
-```sql
+3. create connectors in kafka-connect
+```shell
 curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @oracle-source.json
-
 curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @postgre-sink.json
-
-curl -X DELETE http://localhost:8083/connectors/jdbc-sink-customers-postgress
-
-kafka-topics.sh --bootstrap-server kafka1:9022,kafka2:9022,kafka3:9022 --delete --topic __consumer_offsets
-
-kafka-console-consumer.sh --from-beginning --bootstrap-server kafka1:9092 --topic server1.C__DBZUSER.CONTACT
 ```
+
+# Verification
+1. check if data is synchronized to PostgreSQL
