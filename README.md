@@ -334,3 +334,16 @@ curl -X DELETE http://localhost:8083/connectors/jdbc-sink-customers-postgress
 ```shell
 kafka-console-consumer.sh --from-beginning --bootstrap-server kafka1:9092 --topic server1.C__DBZUSER.CONTACT
 ```
+- ORA-04036: PGA memory used by the instance exceeds PGA_AGGREGATE_LIMIT
+```code
+SQL> show parameter pga_aggregate_limit
+
+NAME TYPE VALUE
+------------------------------------ ----------- ------------------------------
+pga_aggregate_limit big integer 1G
+SQL>
+```
+increase pga_aggregate_limit
+```code
+alter system set pga_aggregate_limit=16G scope=both sid='*';
+```
